@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "how-the-bear-got-a-c"
+version = "0.1.0"
+description = ""
+authors = ["claireboyd <claire.k.boyd@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.8.10"
+pathlib = "^1.0.1"
+argparse = "^1.4.0"
+yelpapi = "^2.5.1"
+pprintpp = "^0.4.0"
+requests = "^2.31.0"
+python-dotenv = "^1.0.1"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
