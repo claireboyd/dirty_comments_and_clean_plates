@@ -76,7 +76,7 @@ def setup(args=None):
     parser = argparse.ArgumentParser(description='Gets JSON of Yelp Businesses from list of dictionaries of Lat/Long values.')
 
     parser.add_argument('--points_filepath', required=True, type=Path, dest="points_filepath", help="Path to file with points for query.")
-    parser.add_argument('--output_filename', required=True, type=Path, dest="output_filename", help="File suffix for saving.")
+    parser.add_argument('--output_filename', required=True, type=Path, dest="output_filename", help="Filename.")
     return parser.parse_args(args)
 
 
