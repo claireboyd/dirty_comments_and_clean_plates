@@ -65,7 +65,7 @@ def get_restaurants_for_points(points_filepath, output_filename):
         output[key] = [restaurant for batch in results for restaurant in batch]
         print(f"Done with point: {key}")
 
-    with open(f"data/{output_filename}.json", "w") as outfile:
+    with open(f"{output_filename}", "w") as outfile:
         json.dump(output, outfile)
 
 def main(points_filepath: Path, output_filename: str):

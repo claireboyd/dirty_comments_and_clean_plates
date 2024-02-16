@@ -6,7 +6,7 @@ Understanding how The Bear got a C: Using Restaurant Reviews to Predict Failed R
 To replicate how we pulled random points to pull data from, run the below line of code:
 
 ```bash
-poetry run python collect/identify_points.py --n 25 --output_filename points
+poetry run python collect/identify_points.py --n 20 --output_filename data/points.json
 ```
 
 **Getting restaurant data**
@@ -14,7 +14,7 @@ poetry run python collect/identify_points.py --n 25 --output_filename points
 To replicate how we pulled in the restaurant data, you can run the below line of code:
 
 ```bash
-poetry run python collect/get_restaurants_by_point.py --points_filepath data/test_points.json --output_filename test_restuarant_pull
+poetry run python collect/get_restaurants_by_point.py --points_filepath data/test_points.json --output_filename data/test_restuarant_pull.json
 ```
 
 

@@ -41,7 +41,7 @@ def save_as_json(gdf_points, output_filename):
         result['longitude'] = point.x
         output["points"].append(result)
 
-    with open(f"data/{output_filename}.json", "w") as outfile:
+    with open(f"{output_filename}", "w") as outfile:
         json.dump(output, outfile)
 
 
