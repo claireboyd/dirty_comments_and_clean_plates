@@ -17,4 +17,10 @@ To replicate how we pulled in the restaurant data, you can run the below line of
 poetry run python collect/get_restaurants_by_point.py --points_filepath data/test_points.json --output_filename data/test_restuarant_pull.json
 ```
 
+**Cleaning inspections data**
 
+To replicate this part of the process, run the following line of code:
+
+```bash
+poetry run python collect/get_inspections.py --inspections_fp data/inspections.parquet --restaurants_fp data/test_restaurant_pull.json
+```
