@@ -14,7 +14,7 @@ poetry run python collect/identify_points.py --n 20 --output_filename data/point
 To replicate how we pulled in the restaurant data, you can run the below line of code:
 
 ```bash
-poetry run python collect/get_restaurants_by_point.py --points_filepath data/test_points.json --output_filename data/test_restuarant_pull.json
+poetry run python collect/get_restaurants_by_point.py --points_filepath data/points.json --output_filename data/restuarant_pull.json
 ```
 
 **Cleaning inspections data**

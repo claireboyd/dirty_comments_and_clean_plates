@@ -1,6 +1,7 @@
 import argparse, geodatasets, shapely, json
 import geopandas as gpd
 import numpy as np
+import matplotlib.pyplot as plt
 
 def get_n_geopoints(n):
     """
@@ -24,6 +25,11 @@ def get_n_geopoints(n):
     gdf_points = gpd.GeoSeries(gpd.points_from_xy(x, y))
     # only keep those points within the chicago polygon
     gdf_points = gdf_points[gdf_points.within(chicago_polygon.unary_union)]
+    
+    #plot points to check if reasonably distributed
+    # gdf_points[:n].plot()
+    # plt.show()
+    
     return gdf_points[:n]
 
 

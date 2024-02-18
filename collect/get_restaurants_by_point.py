@@ -55,7 +55,7 @@ def get_restaurants_for_points(points_filepath, output_filename):
               
         results = []
         for i in range(0, 1000, 50):
-            print(f"Processing review {i}...")
+            print(f"Processing restaurant {i}...")
             point_params["offset"] = i
 
             #get response for specific params
