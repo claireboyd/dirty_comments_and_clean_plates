@@ -4,6 +4,9 @@ from typing import List
 from datatypes import ReviewText
 import jsonlines
 import time
+import logging
+
+logging.basicConfig(filename='error.log', level=logging.ERROR, format='%(asctime)s - %(levelname)s - %(message)s')
 
 
 def scrape_single_page(url: str) -> List[dict[str, str]]:
@@ -15,7 +18,12 @@ def scrape_single_page(url: str) -> List[dict[str, str]]:
     s = requests.Session()
     resp = s.get(url)
     review_page = lxml.html.fromstring(resp.text)
-    review_content = review_page.cssselect('[aria-label="Recommended Reviews"]')[0]
+
+    try:
+        review_content = review_page.cssselect('[aria-label="Recommended Reviews"]')[0]
+    except IndexError:
+        logging.error("Unable to scrape url: %", url)
+        return 
 
     review_text = review_content.cssselect("[class*=comment]")
     dates = review_content.cssselect('[class=" css-10n911v"]')

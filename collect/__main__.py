@@ -10,11 +10,11 @@ args = parser.parse_args()
 
 if __name__ == "__main__":
 
-    if args.scraper:
+    if args.scrape:
         with open("data/restuarant_pull.json", "r") as rawfile:
             data = json.load(rawfile)
 
-            if args.num_reviews:
+            if args.num_reviews: 
                 num_reviews = args.num_reviews
             else:
                 num_reviews = 25
