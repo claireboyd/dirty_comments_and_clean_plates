@@ -20,6 +20,9 @@ matplotlib = "^3.8.3"
 pyarrow = "^15.0.0"
 fastparquet = "^2024.2.0"
 polars = "^0.20.9"
+pydantic = "^2.6.1"
+jsonlines = "^4.0.0"
+cssselect = "^1.2.0"
 
 
 [tool.poetry.group.dev.dependencies]

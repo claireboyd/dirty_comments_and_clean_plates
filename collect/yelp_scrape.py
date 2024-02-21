@@ -3,8 +3,7 @@ import lxml.html
 from typing import List
 from datatypes import ReviewText
 import jsonlines
-import json
-import os
+import time
 
 
 def scrape_single_page(url: str) -> List[dict[str, str]]:
@@ -13,7 +12,8 @@ def scrape_single_page(url: str) -> List[dict[str, str]]:
 
     Returns list of dictionaries, containing review text, user name, review date
     """
-    resp = requests.get(url)
+    s = requests.Session()
+    resp = s.get(url)
     review_page = lxml.html.fromstring(resp.text)
     review_content = review_page.cssselect('[aria-label="Recommended Reviews"]')[0]
 
@@ -21,8 +21,10 @@ def scrape_single_page(url: str) -> List[dict[str, str]]:
     dates = review_content.cssselect('[class=" css-10n911v"]')
     users = review_content.cssselect('[class*="user-passport-info"] a[role="link"]')
 
+    num_reviews = min(len(review_text), len(dates), len(users))
+
     page_data = []
-    for i in range(min(len(review_text), 10)):
+    for i in range(min(num_reviews, 10)):
         review_data = {}
         review_data["text"] = review_text[i].text_content()
         review_data["date"] = dates[i].text_content()
@@ -43,14 +45,17 @@ def parse_single_response(
     alias = response["alias"]
     for page_num in range(0, max_reviews, 10):
         url = f"https://www.yelp.com/biz/{alias}?start={page_num}#reviews"
-        print(f'Scraping: {alias}, Review: {page_num} out of {max_reviews}')
+        print(f"Scraping: {alias}, Review: {page_num} out of {max_reviews}")
+        time.sleep(1)
         results = scrape_single_page(url)
         if not results:
             break
         aggregate_and_save(results, response, filepath, clean, tokenize)
 
 
-def aggregate_and_save(results, response, filepath, clean, tokenize):
+def aggregate_and_save(
+    results: dict, response: dict, filepath: str, clean: bool, tokenize: bool
+):
     """
     Aggergates text and API data, cleans and tokensize, and saves to specifiy file path
     """
@@ -76,24 +81,20 @@ def aggregate_and_save(results, response, filepath, clean, tokenize):
             out.write(data.model_dump(mode="json"))
 
 
-def scrape(in_path, out_folder, coords, num_reviews, start=None, stop=None):
-    with open(in_path, "r") as rawfile:
-        data = json.load(rawfile)
-
+def scrape(
+    data: dict,
+    out_folder: str,
+    coords: str,
+    num_reviews: int,
+    start: int = None,
+    stop: int = None,
+):
+    """
+    Scrapes all resturants based on inputed coordinates.
+    """
     responses = data[coords]
     lat, _, lon = coords.split()
 
     out_path = f"{out_folder}/coordinates_{lat[:5]}_{lon[:5]}.jsonl"
     for response in responses[start:stop]:
         parse_single_response(response, out_path, num_reviews)
-
-
-if __name__ == "__main__":
-    test_coords = "41.755097245008066 , -87.63462521491509"
-    scrape(
-        "data/restuarant_pull.json",
-        out_folder="data",
-        coords=test_coords,
-        num_reviews=30,
-        stop=10,
-    )
