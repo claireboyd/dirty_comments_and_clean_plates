@@ -28,6 +28,7 @@ cssselect = "^1.2.0"
 [tool.poetry.group.dev.dependencies]
 black = "^24.2.0"
 mypy = "^1.8.0"
+ipykernel = "^6.29.2"
 
 [build-system]
 requires = ["poetry-core"]
