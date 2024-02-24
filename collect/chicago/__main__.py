@@ -15,7 +15,7 @@ args = parser.parse_args()
 if __name__ == "__main__":
 
     if args.scrape:
-        with open("data/inspected_restuarants.json", "r") as rawfile:
+        with open("data/chicago/inspected_restuarants.json", "r") as rawfile:
             data = json.load(rawfile)
 
         if args.num_reviews: 
@@ -24,12 +24,12 @@ if __name__ == "__main__":
             num_reviews = 10
     
         tagged_data = tag_resturant_json(data)
-        coords_dict = coords_to_points('data/points.json')
-        out_folder = "data/scraped"
+        coords_dict = coords_to_points('data/chicago/points.json')
+        out_folder = "data/chicago/scraped"
         os.makedirs(out_folder, exist_ok=True)
 
-        if Path('data/checklist.json').is_file():
-            with open('data/checklist.json', 'r') as f:
+        if Path('data/chicago/checklist.json').is_file():
+            with open('data/chicago/checklist.json', 'r') as f:
                 checklist = json.load(f)
         else:
             checklist = create_scrape_list(tagged_data)
