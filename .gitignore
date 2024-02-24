@@ -4,3 +4,4 @@ poetry.lock
 .ipynb_checkpoints
 .idea
 *.env
+data/yelp_dataset/
