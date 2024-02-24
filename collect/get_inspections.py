@@ -45,7 +45,7 @@ def clean_restaurants(restaurants_fp):
     
     #read json file
     with open(restaurants_fp, "r") as infile:
-        data = json.load(infile)
+        data = json.load(infile) 
     
     # standardize json into df format and concat into one df
     dfs = []

@@ -7,9 +7,14 @@ import json
 import time
 import logging
 
-logging.basicConfig(filename='error.log', level=logging.ERROR, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(
+    filename="error.log",
+    level=logging.ERROR,
+    format="%(asctime)s - %(levelname)s - %(message)s",
+)
 
-def scrape_single_page(url: str) ->Tuple[List[dict[str, str]], int]:
+
+def scrape_single_page(url: str) -> Tuple[List[dict[str, str]], int]:
     """
     Scrapes single Yelp page
 
@@ -22,7 +27,9 @@ def scrape_single_page(url: str) ->Tuple[List[dict[str, str]], int]:
     try:
         review_content = review_page.cssselect('[aria-label="Recommended Reviews"]')[0]
     except IndexError:
-        logging.error("Unable to scrape url: %s, Status Code: %s", url, resp.status_code)
+        logging.error(
+            "Unable to scrape url: %s, Status Code: %s", url, resp.status_code
+        )
         return None, resp.status_code
 
     review_text = review_content.cssselect("[class*=comment]")
@@ -94,10 +101,10 @@ def scrape(
     data: dict,
     out_folder: str,
     point: int,
-    coords: dict, 
+    coords: dict,
     num_reviews: int,
     checklist: dict,
-    override: int = float('inf')
+    override: int = float("inf"),
 ):
     """
     Scrapes all resturants based on inputed coordinates.
@@ -107,7 +114,7 @@ def scrape(
 
     out_path = f"{out_folder}/zone_{point}.jsonl"
     for idx, response in enumerate(responses):
-        rest_alias = response['alias']
+        rest_alias = response["alias"]
         if checklist[rest_alias]:
             continue
         status = parse_single_response(response, out_path, num_reviews)
@@ -115,10 +122,7 @@ def scrape(
 
         if status > 200 or idx == override:
             # save progress and break code
-            with open(f"{out_folder}/checklist.json", 'w') as f:
+            with open(f"{out_folder}/checklist.json", "w") as f:
                 json.dump(checklist, f)
 
-            raise ValueError(F'Status code: {status} not valid')
-            
-
-
+            raise ValueError(f"Status code: {status} not valid")
