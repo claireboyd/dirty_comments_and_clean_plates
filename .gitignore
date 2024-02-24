@@ -1,0 +1,7 @@
+*.pyc
+poetry.lock
+.DS_Store
+.ipynb_checkpoints
+.idea
+*.env
+data/yelp_dataset/
