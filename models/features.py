@@ -18,8 +18,8 @@ FEATURES = [
     "below_500k",
     "above_500k",
     "IR_regular",
-    'IR_follow_up',
-    'IR_other',
+    "IR_follow_up",
+    "IR_other",
 ]
 
 CATEGORIES = [
@@ -139,50 +139,49 @@ def categorize_population(df: pd.DataFrame) -> pd.DataFrame:
 
     return df_w_pop.drop(columns=["TOTPOP20", "NAME20"])
 
-def cat_inspection_reason(df: pd.DataFrame) -> pd.DataFrame:
-    '''
-    One-hot encoding based on inpsection reason
-    '''
-    df['IR_regular'] = 0
-    df['IR_follow_up'] = 0
-    df['IR_other'] = 0
 
-    df.loc[df['Inspection Reason Type'] == 'Regular', 'IR_regular'] = 1
-    df.loc[df['Inspection Reason Type'] == 'Follow Up', 'IR_follow_up'] = 1
-    df.loc[(df['IR_regular'] != 1) & (df['IR_follow_up'] != 1), 'IR_other'] = 0 
+def cat_inspection_reason(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    One-hot encoding based on inpsection reason
+    """
+    df["IR_regular"] = 0
+    df["IR_follow_up"] = 0
+    df["IR_other"] = 0
+
+    df.loc[df["Inspection Reason Type"] == "Regular", "IR_regular"] = 1
+    df.loc[df["Inspection Reason Type"] == "Follow Up", "IR_follow_up"] = 1
+    df.loc[(df["IR_regular"] != 1) & (df["IR_follow_up"] != 1), "IR_other"] = 0
 
     return df
 
 
 def main(file_name: str, split: bool = False):
     phila = pd.read_csv("data/phila/labeled_inspections_with_reviews.csv")
-    phila['Inspection Date'] = pd.to_datetime(phila['Inspection Date'])
-    phila['Inspection Date'] = phila["Inspection Date"].dt.month
-    phila = phila.rename(columns={'Inspection Date' : 'Month'})
+    phila["Inspection Date"] = pd.to_datetime(phila["Inspection Date"])
+    phila["Inspection Date"] = phila["Inspection Date"].dt.month
+    phila = phila.rename(columns={"Inspection Date": "Month"})
     encoded, food_cats = encode_categories(phila, 25)
     encoded = categorize_population(encoded)
     encoded = cat_inspection_reason(encoded)
     encoded = encoded[FEATURES + food_cats]
-    
+
     if split:
-        os.makedirs('data/split', exist_ok=True)
-        encoded = encoded.reset_index().rename(columns={'index' : 'uuid'})
+        os.makedirs("data/split", exist_ok=True)
+        encoded = encoded.reset_index().rename(columns={"index": "uuid"})
         val = encoded.sample(frac=0.10)
-        leftover = encoded[~encoded['uuid'].isin(val['uuid'].to_list())]
+        leftover = encoded[~encoded["uuid"].isin(val["uuid"].to_list())]
         train, test = train_test_split(leftover, train_size=0.90, shuffle=True)
 
-        val.drop(columns=['uuid']).to_csv('data/split/val.csv', index=False)
-        train.drop(columns=['uuid']).to_csv('data/split/train.csv', index=False)
-        test.drop(columns=['uuid']).to_csv('data/split/test.csv', index=False)
+        val.drop(columns=["uuid"]).to_csv("data/split/val.csv", index=False)
+        train.drop(columns=["uuid"]).to_csv("data/split/train.csv", index=False)
+        test.drop(columns=["uuid"]).to_csv("data/split/test.csv", index=False)
     else:
-        encoded.to_csv(f'data/{file_name}', index=False)
-    
+        encoded.to_csv(f"data/{file_name}", index=False)
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--file_name", type=str, required=False)
-    parser.add_argument("--split", action='store_true', required=False)
+    parser.add_argument("--split", action="store_true", required=False)
     args = parser.parse_args()
     main(args.file_name, args.split)
-
