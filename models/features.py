@@ -1,32 +1,25 @@
 import pandas as pd
 import geopandas as gpd
 import argparse
+from sklearn.model_selection import train_test_split
+import os
 
-REL_COLS = [
-    "Active Indicator",
-    "Public Facility Name",
-    "Address",
-    "City",
-    "County Name",
-    "Zip Code",
-    "State",
-    "Inspection Date",
-    "Inspection Reason Type",
+
+FEATURES = [
     "Overall Compliance",
-    "business_id",
     "name",
-    "latitude",
-    "longitude",
     "stars",
     "review_count",
     "is_open",
-    "categories",
-    "prev_date",
-    "prev_date_with_nulls",
     "reviews",
     "ratings",
     "n_reviews",
     "avg_rating",
+    "below_500k",
+    "above_500k",
+    "IR_regular",
+    'IR_follow_up',
+    'IR_other',
 ]
 
 CATEGORIES = [
@@ -112,6 +105,7 @@ def encode_categories(df: pd.DataFrame, n: int) -> pd.DataFrame:
     """
     df["categories"] = df["categories"].str.replace(r"\([^()]*\)", "", regex=True)
     df["categories"] = df["categories"].str.strip()
+    kept_columns = []
 
     for cat in CATEGORIES:
         df[cat] = 0
@@ -119,8 +113,10 @@ def encode_categories(df: pd.DataFrame, n: int) -> pd.DataFrame:
 
         if df[cat].sum() < n:
             df = df.drop(columns=cat)
+        else:
+            kept_columns.append(cat)
 
-    return df.drop(columns=["categories"])
+    return df.drop(columns=["categories"]), kept_columns
 
 
 def categorize_population(df: pd.DataFrame) -> pd.DataFrame:
@@ -143,17 +139,50 @@ def categorize_population(df: pd.DataFrame) -> pd.DataFrame:
 
     return df_w_pop.drop(columns=["TOTPOP20", "NAME20"])
 
+def cat_inspection_reason(df: pd.DataFrame) -> pd.DataFrame:
+    '''
+    One-hot encoding based on inpsection reason
+    '''
+    df['IR_regular'] = 0
+    df['IR_follow_up'] = 0
+    df['IR_other'] = 0
 
-def main(file_name: str):
+    df.loc[df['Inspection Reason Type'] == 'Regular', 'IR_regular'] = 1
+    df.loc[df['Inspection Reason Type'] == 'Follow Up', 'IR_follow_up'] = 1
+    df.loc[(df['IR_regular'] != 1) & (df['IR_follow_up'] != 1), 'IR_other'] = 0 
+
+    return df
+
+
+def main(file_name: str, split: bool = False):
     phila = pd.read_csv("data/phila/labeled_inspections_with_reviews.csv")
-    phila = phila[REL_COLS]
-    encoded = encode_categories(phila, 25)
+    phila['Inspection Date'] = pd.to_datetime(phila['Inspection Date'])
+    phila['Inspection Date'] = phila["Inspection Date"].dt.month
+    phila = phila.rename(columns={'Inspection Date' : 'Month'})
+    encoded, food_cats = encode_categories(phila, 25)
     encoded = categorize_population(encoded)
-    encoded.to_csv(f"data/phila/{file_name}", index=False)
+    encoded = cat_inspection_reason(encoded)
+    encoded = encoded[FEATURES + food_cats]
+    
+    if split:
+        os.makedirs('data/split', exist_ok=True)
+        encoded = encoded.reset_index().rename(columns={'index' : 'uuid'})
+        val = encoded.sample(frac=0.10)
+        leftover = encoded[~encoded['uuid'].isin(val['uuid'].to_list())]
+        train, test = train_test_split(leftover, train_size=0.90, shuffle=True)
+
+        val.drop(columns=['uuid']).to_csv('data/split/val.csv', index=False)
+        train.drop(columns=['uuid']).to_csv('data/split/train.csv', index=False)
+        test.drop(columns=['uuid']).to_csv('data/split/test.csv', index=False)
+    else:
+        encoded.to_csv(f'data/{file_name}', index=False)
+    
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--file_name", type=str, required=True)
+    parser.add_argument("--file_name", type=str, required=False)
+    parser.add_argument("--split", action='store_true', required=False)
     args = parser.parse_args()
-    main(args.file_name)
+    main(args.file_name, args.split)
+
