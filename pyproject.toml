@@ -26,6 +26,10 @@ cssselect = "^1.2.0"
 xgboost = "^2.0.3"
 scikit-learn = "^1.4.1.post1"
 nltk = "^3.8.1"
+pandas = "^2.2.1"
+numpy = "^1.26.4"
+torchtext = "0.15.1"
+portalocker = "2.7.0"
 
 
 [tool.poetry.group.dev.dependencies]
