@@ -23,6 +23,7 @@ polars = "^0.20.9"
 pydantic = "^2.6.1"
 jsonlines = "^4.0.0"
 cssselect = "^1.2.0"
+transformers = "^4.38.1"
 
 
 [tool.poetry.group.dev.dependencies]
