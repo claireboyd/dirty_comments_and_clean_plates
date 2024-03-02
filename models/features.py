@@ -15,11 +15,15 @@ FEATURES = [
     "ratings",
     "n_reviews",
     "avg_rating",
-    "below_500k",
-    "above_500k",
     "IR_regular",
     "IR_follow_up",
     "IR_other",
+    "Chester",
+    "Bucks",
+    "Philadelphia",
+    "Delaware",
+    "Montgomery",
+    "Berks",
 ]
 
 CATEGORIES = [
@@ -119,25 +123,28 @@ def encode_categories(df: pd.DataFrame, n: int) -> pd.DataFrame:
     return df.drop(columns=["categories"]), kept_columns
 
 
-def categorize_population(df: pd.DataFrame) -> pd.DataFrame:
+def categorize_counties(df: pd.DataFrame) -> pd.DataFrame:
     """
     Add features based on population.
     """
-    pa_counties = gpd.read_file("data/phila/pa_county")
-    df_w_pop = pd.merge(
+    pa_counties = gpd.read_file("data/phila/pa_county").to_crs("EPSG:4326")
+    geo_df = gpd.GeoDataFrame(
         df,
-        pa_counties[["NAME20", "TOTPOP20"]],
-        left_on="County Name",
-        right_on="NAME20",
+        geometry=gpd.points_from_xy(df["longitude"], df["latitude"]),
+        crs="EPSG:4326",
+    )
+    df_counties = gpd.sjoin(
+        geo_df,
+        pa_counties[["NAME20", "TOTPOP20", "geometry"]],
+        how="left",
+        predicate="within",
     )
 
-    df_w_pop["below_500k"] = 0
-    df_w_pop["above_500k"] = 0
+    for county in df_counties["NAME20"].unique():
+        df_counties[county] = 0
+        df_counties.loc[df_counties["NAME20"] == county, county] = 1
 
-    df_w_pop.loc[df_w_pop["TOTPOP20"] >= 500000, "below_500k"] = 1
-    df_w_pop.loc[df_w_pop["TOTPOP20"] < 500000, "above_500k"] = 1
-
-    return df_w_pop.drop(columns=["TOTPOP20", "NAME20"])
+    return pd.DataFrame(df_counties)
 
 
 def cat_inspection_reason(df: pd.DataFrame) -> pd.DataFrame:
@@ -161,7 +168,7 @@ def main(file_name: str, split: bool = False):
     phila["Inspection Date"] = phila["Inspection Date"].dt.month
     phila = phila.rename(columns={"Inspection Date": "Month"})
     encoded, food_cats = encode_categories(phila, 25)
-    encoded = categorize_population(encoded)
+    encoded = categorize_counties(encoded)
     encoded = cat_inspection_reason(encoded)
     encoded = encoded[FEATURES + food_cats]
 
