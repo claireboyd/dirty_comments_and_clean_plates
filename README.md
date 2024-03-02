@@ -1,5 +1,5 @@
-# how_the_bear_got_a_C
-Understanding how The Bear got a C: Using Restaurant Reviews to Predict Failed Restaurant Inspections in Chicago
+# Dirty Comments, Clean Plates
+Dirty Comments, Clean Plates: Using Restaurant Reviews to Predict Failed Restaurant Inspections in Philadelphia
 
 **Determining the points to pull data for**
 
