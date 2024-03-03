@@ -32,7 +32,7 @@ class Vectorizer(object):
 
     def set_tfidf(self,cleaned_texts):
         self.tfidf.fit(cleaned_texts)
-    
+
     def build_vectorizer(self):
         cleaned_texts = self.clean_texts()
         self.set_tfidf(cleaned_texts)
