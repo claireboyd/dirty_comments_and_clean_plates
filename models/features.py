@@ -162,7 +162,7 @@ def cat_inspection_reason(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-def main(file_name: str, split: bool = False):
+def main(file_name: str, split: bool = False, destination_directory: str = "data/phila/split"):
     phila = pd.read_csv("data/phila/labeled_inspections_with_reviews.csv")
     phila["Inspection Date"] = pd.to_datetime(phila["Inspection Date"])
     phila["Inspection Date"] = phila["Inspection Date"].dt.month
@@ -173,15 +173,15 @@ def main(file_name: str, split: bool = False):
     encoded = encoded[FEATURES + food_cats]
 
     if split:
-        os.makedirs("data/split", exist_ok=True)
+        os.makedirs(destination_directory, exist_ok=True)
         encoded = encoded.reset_index().rename(columns={"index": "uuid"})
         val = encoded.sample(frac=0.10)
         leftover = encoded[~encoded["uuid"].isin(val["uuid"].to_list())]
         train, test = train_test_split(leftover, train_size=0.90, shuffle=True)
 
-        val.drop(columns=["uuid"]).to_csv("data/split/val.csv", index=False)
-        train.drop(columns=["uuid"]).to_csv("data/split/train.csv", index=False)
-        test.drop(columns=["uuid"]).to_csv("data/split/test.csv", index=False)
+        val.drop(columns=["uuid"]).to_csv(f"{destination_directory}/val.csv", index=False)
+        train.drop(columns=["uuid"]).to_csv(f"{destination_directory}/train.csv", index=False)
+        test.drop(columns=["uuid"]).to_csv(f"{destination_directory}/test.csv", index=False)
     else:
         encoded.to_csv(f"data/{file_name}", index=False)
 
@@ -190,5 +190,6 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--file_name", type=str, required=False)
     parser.add_argument("--split", action="store_true", required=False)
+    parser.add_argument("--destination_directory", type=str, required=False)
     args = parser.parse_args()
     main(args.file_name, args.split)
