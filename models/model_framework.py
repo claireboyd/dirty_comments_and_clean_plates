@@ -18,7 +18,7 @@ class Vectorizer(object):
         self.ngram_range = ngram_range #size of ngrams to use as each observation
         self.tfidf = TfidfVectorizer(analyzer='word',
                                      stop_words=self.stopwords,
-                                     ngram_range=self.ngram_range, 
+                                     ngram_range=self.ngram_range,
                                      max_features=self.max_features)
 
     def clean_texts(self):
@@ -29,7 +29,7 @@ class Vectorizer(object):
             text = text.lower().strip()
             cleaned.append(text)
         return cleaned
-    
+
     def set_tfidf(self,cleaned_texts):
         self.tfidf.fit(cleaned_texts)
     
@@ -43,7 +43,7 @@ class Vectorizer(object):
 
 #REVIEWS DATASET CLASS
 class ReviewsDataset(torch.utils.data.Dataset):
-    def __init__(self, vectorizer, df_filepath, max_features=7000, 
+    def __init__(self, vectorizer, df_filepath, max_features=7000,
                  ngram_range=(1,2), y_col="y", features=None):
 
         # read in data and encode outcome variable
@@ -61,7 +61,7 @@ class ReviewsDataset(torch.utils.data.Dataset):
         self.vectorizer = vectorizer(df_filepath=df_filepath,
                         clean_regex="[^a-zA-Z0-9]",
                         max_features=max_features,
-                        ngram_range=ngram_range, 
+                        ngram_range=ngram_range,
                         stop_words="english")
         self.vectorizer.build_vectorizer()
         self.text = self.vectorizer.vectorizeTexts().toarray()
@@ -79,7 +79,7 @@ class ReviewsDataset(torch.utils.data.Dataset):
         return sample
     
 
-#OTHER HELPERS 
+#OTHER HELPERS
 def encode_output_variable(filepath, svm=None):
     df = pd.read_csv(filepath)
     if svm:
