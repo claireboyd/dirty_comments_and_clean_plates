@@ -23,7 +23,8 @@ class Vectorizer(TfidfVectorizer):
             ngram_range=self.ngram_range,
             max_features=self.max_features,
             lowercase=True,
-            max_df=0.5,
+            binary=True,
+            #max_df=0.5,
             #min_df=5
         )
         self.fixed_vocabulary_ = False
