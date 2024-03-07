@@ -2,7 +2,6 @@ import pandas as pd
 import json
 from datetime import timedelta
 
-
 # join design
 def extract_relevant_reviews(row):
     # filter all reviews down to only those relevant for the inspection
