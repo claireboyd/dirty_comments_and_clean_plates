@@ -3,70 +3,70 @@ import pandas as pd
 import re
 from sklearn.feature_extraction.text import TfidfVectorizer
 torch.set_default_dtype(torch.float64)
+from ast import literal_eval
 
 # VECTORIZER CLASS
-class Vectorizer(object):
-    def __init__(self, df_filepath, ngram_range=None, clean_regex=None, max_features=None, stop_words=None):
-        # read in reviews to vectorizor object
-        self.df = pd.read_csv(df_filepath)
-        self.texts=self.df['reviews']
+class Vectorizer(TfidfVectorizer):
+    def __init__(self, ngram_range=None, max_features=None, stop_words=None):
 
         # vectorizor params
-        self.clean_regex = clean_regex
         self.max_features = max_features #vocab size
         self.stopwords = stop_words #if we want to remove these or not
         self.ngram_range = ngram_range #size of ngrams to use as each observation
-        self.tfidf = TfidfVectorizer(analyzer='word',
-                                     stop_words=self.stopwords,
-                                     ngram_range=self.ngram_range,
-                                     max_features=self.max_features)
+        # https://scikit-learn.org/stable/modules/generated/sklearn.feature_extraction.text.TfidfVectorizer.html
+        self.tfidf = TfidfVectorizer(
+            analyzer='word',
+            stop_words=self.stopwords,
+            ngram_range=self.ngram_range,
+            max_features=self.max_features,
+            lowercase=True,
+            binary=True
+        )
+        self.fixed_vocabulary_ = False
 
-    def clean_texts(self):
-        cleaned = []
-        for text in self.texts:
-            if self.clean_regex is not None:
-                text = re.sub(self.clean_regex," ",text)
-            text = text.lower().strip()
-            cleaned.append(text)
-        return cleaned
-
-    def set_tfidf(self,cleaned_texts):
-        self.tfidf.fit(cleaned_texts)
-
-    def build_vectorizer(self):
-        cleaned_texts = self.clean_texts()
-        self.set_tfidf(cleaned_texts)
-        
-    def vectorizeTexts(self):
-        cleaned_texts = self.clean_texts()
-        return self.tfidf.transform(cleaned_texts)
-
+    def vectorize_texts(self, texts):
+        self.tfidf.fit(texts)
+        self.vocabulary_ = self.tfidf.vocabulary_
+        return self.tfidf.transform(texts)
+    
 #REVIEWS DATASET CLASS
 class ReviewsDataset(torch.utils.data.Dataset):
-    def __init__(self, vectorizer, df_filepath, max_features=7000,
-                 ngram_range=(1,2), y_col="y", features=None):
+    def __init__(self, vectorizer, df_filepath, clean_regex="[^a-zA-Z0-9]", y_col="y", features=None, expanded=False):
 
-        # read in data and encode outcome variable
+        # read in data and encode outcome variable as labels
         self.df = pd.read_csv(df_filepath)
+
+        if expanded == True:
+            self.df['reviews'] = self.df['reviews'].apply(literal_eval)
+            self.df = self.df.explode("reviews").reset_index()
+
         self.df[[y_col]] = 0
         self.df.loc[self.df.loc[:,'Overall Compliance'] == "No",y_col] = 1
-        
-        #self.text = vectorized_reviews
         self.labels = self.df.loc[:,'y']
+
+        # args for creating a cleaned text
+        self.clean_regex = clean_regex
+        self.raw_text=self.df['reviews']
+        self.cleaned_text = self.clean_texts(self.raw_text)
+
+        # args for vectorizing clean text
+        self.vectorizer = vectorizer
+        self.text = vectorizer.vectorize_texts(self.cleaned_text).toarray().todense()
         
         if features is not None:
             self.features = self.df.loc[:,features]
 
-        #self.text = vectorized_reviews
-        self.vectorizer = vectorizer(df_filepath=df_filepath,
-                        clean_regex="[^a-zA-Z0-9]",
-                        max_features=max_features,
-                        ngram_range=ngram_range,
-                        stop_words="english")
-        self.vectorizer.build_vectorizer()
-        self.text = self.vectorizer.vectorizeTexts().toarray()
-        self.feature_labels = list(self.features.columns)
-
+    def clean_texts(self, raw_text):
+        cleaned = []
+        for text in raw_text:
+            text = ' '.join(text.split(r'\n'))
+            text = re.sub(self.clean_regex," ",text).lower()
+            #delete numbers
+            text = re.sub(r'\d+', '', text)
+            text = re.sub(' +', ' ', text)
+            cleaned.append(text)
+        return cleaned
+    
     def __len__(self):
         return len(self.text)
 
@@ -79,7 +79,7 @@ class ReviewsDataset(torch.utils.data.Dataset):
         return sample
     
 
-#OTHER HELPERS
+#OTHER HELPERS 
 def encode_output_variable(filepath, svm=None):
     df = pd.read_csv(filepath)
     if svm:
