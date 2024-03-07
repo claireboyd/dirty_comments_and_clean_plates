@@ -1,0 +1,7 @@
+You attended a restaurant named REST_NAME.
+You rated your experience with NUM_STARS stars out of 5.
+Write a REV_TONE review of NUM_WORDS words describing your experience.
+
+Consider the examples below:
+
+EXAMPLES
