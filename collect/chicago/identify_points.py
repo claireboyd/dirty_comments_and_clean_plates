@@ -25,14 +25,7 @@ def get_n_geopoints(n):
     gdf_points = gpd.GeoSeries(gpd.points_from_xy(x, y))
     # only keep those points within the chicago polygon
     gdf_points = gdf_points[gdf_points.within(chicago_polygon.unary_union)]
-    
-    #plot points to check if reasonably distributed
-    # gdf_points[:n].plot()
-    # plt.show()
-    
     return gdf_points[:n]
-
-
 
 def save_as_json(gdf_points, output_filename):
     """
@@ -50,14 +43,10 @@ def save_as_json(gdf_points, output_filename):
     with open(f"{output_filename}", "w") as outfile:
         json.dump(output, outfile)
 
-
-
 def main(n: str, output_filename: str):
     # run both functions and save to data folder
     gdf_points = get_n_geopoints(int(n))
     save_as_json(gdf_points, output_filename)
-
-
 
 def setup(args=None):    
     parser = argparse.ArgumentParser(description='Gets random n lat/long points in chicago.')

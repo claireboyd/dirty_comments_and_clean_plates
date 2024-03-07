@@ -13,11 +13,8 @@ class ReviewText(BaseModel):
     def clean(cls):
 
         ##TODO:
-
         # remove puncutation
-
         # remove numbers 
-
         pass
 
     def tokenize(cls):

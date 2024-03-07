@@ -4,8 +4,6 @@ import pandas as pd
 import polars as pl
 import argparse, json
 
-
-
 def read_inspections():
     # ONLY NEED TO DO THIS ONCE
     # download all data from this website: https://data.cityofchicago.org/Health-Human-Services/Food-Inspections/4ijn-s7e5/about_data
@@ -16,16 +14,6 @@ def read_inspections():
     return
 
 def clean_inspections(inspections_fp):
-    # POLARS VERSION
-    # df = pl.read_parquet(inspections_fp)
-    
-    # #filtering out restaurants that do not have a license number
-    # df = df.drop_nulls("License #").filter(pl.col("License #") > 0)
-
-    # #convert inspection date to datetime object and add new col with the previous inspection date
-    # df = df.with_columns([pl.col('Inspection Date').str.to_datetime("%m/%d/%y")]).sort(pl.col('Inspection Date')).sort(pl.col('License #'))
-    # df = df.with_columns([pl.col('Inspection Date').shift().over('License #', "DBA Name").alias('Prev Inspection Date')])
-
     # Read the parquet file into a pandas DataFrame
     df = pd.read_parquet(inspections_fp)
 
@@ -73,13 +61,10 @@ def clean_restaurants(restaurants_fp):
                         'location.address3', 
                         'location.city', 
                         'location.state']].map(str.upper, na_action='ignore')
-
     restaurants[['location.zip_code']] = restaurants[['location.zip_code']].astype('float64')
-    
     return restaurants
 
 def merge(inspections, restaurants):
-
     merged = pd.merge(left=inspections,
              right=restaurants, 
              how="inner",
@@ -95,12 +80,7 @@ def merge(inspections, restaurants):
 def main(inspections_fp: str, restaurants_fp: str):
     inspections = clean_inspections(inspections_fp)
     restaurants = clean_restaurants(restaurants_fp)
-    # print(inspections.loc[:,"Zip"])
-    # print(restaurants.loc[:,"location.zip_code"])
-
     merged = merge(inspections, restaurants)
-    print(merged)
-
     return 
 
 
@@ -109,7 +89,6 @@ def setup(args=None):
     parser.add_argument('--inspections_fp', required=True, type=Path, dest="inspections_fp", help="Path to inspections parquet file.")
     parser.add_argument('--restaurants_fp', required=True, type=Path, dest="restaurants_fp", help="Path to restaurants json file.")
     return parser.parse_args(args)
-
 
 if __name__ == "__main__":
     main(**vars(setup()))
