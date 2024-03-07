@@ -17,21 +17,25 @@ def concatenante_reviews(sample_n: int = 0) -> pd.DataFrame:
     real_df['num_shot'] = 0
 
     real_df = real_df[['text', 'label', 'source', 'num_shot']]
-    if sample_n:
-        real_df = real_df.sample(n=sample_n)
 
     gpt_dir = 'chat_gpt/gpt_reviews/'
     gpt_files = os.listdir(gpt_dir)
 
     dfs = []
+    gpt_rows = 0
+
     for gpt_file in gpt_files: 
         gpt_df = pd.read_csv(f'{gpt_dir}/{gpt_file}')
         gpt_df = gpt_df.rename(columns={'REVIEW' : 'text', 'LABEL': 'label', 'MODEL': 'source', 'NUM_SHOTS' : 'num_shot'})
+        gpt_rows += len(gpt_df)
         dfs.append(gpt_df)
 
+    print('Number of GPT:', gpt_rows)
+    real_df = real_df.sample(n=round(gpt_rows))
     dfs.append(real_df)
+    
     all_df = pd.concat(dfs)
-    return all_df 
+    return all_df[['text', 'label', 'source', 'num_shot']]
 
 
 def test_train_val_split(df: pd.DataFrame, out_folder: str):
