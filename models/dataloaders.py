@@ -112,6 +112,7 @@ class BERTReviewData(Dataset):
         df: pd.DataFrame,
         tokenizer: DistilBertTokenizer,
         max_tokens: int,
+        labels: dict,
         expanded: bool = False,
     ):
         self.tokenizer = tokenizer
@@ -119,7 +120,9 @@ class BERTReviewData(Dataset):
         self.max_tokens = max_tokens
         self.expanded = expanded
         self.review_text = self.clean_text(self.df)
-        self.target_cat = self.df["Overall Compliance"]
+        self.target_cat = self.df["label"]
+        self.labels = labels
+
 
     def clean_text(self, df: pd.DataFrame) -> pd.Series:
 
@@ -134,13 +137,13 @@ class BERTReviewData(Dataset):
             return cleaned
 
         if self.expanded:
-            df["reviews"] = df["reviews"].str.strip()
-            df["reviews"] = df["reviews"].str.replace("\n", " ")
-            df["reviews"] = df["reviews"].str.replace(r"[^a-zA-Z0-9]", " ", regex=True)
+            df["text"] = df["text"].str.strip()
+            df["text"] = df["text"].str.replace("\n", " ")
+            df["text"] = df["text"].str.replace(r"[^a-zA-Z0-9]", " ", regex=True)
 
-            return df["reviews"]
+            return df["text"]
 
-        return df["reviews"].apply(clean_reviews)
+        return df["text"].apply(clean_reviews)
 
     def __len__(self):
         return len(self.review_text)
@@ -166,7 +169,7 @@ class BERTReviewData(Dataset):
 
         # [0, 1] = pass, [1, 0] = fail
         target = []
-        if target_cat == "No":
+        if target_cat == self.labels[0]:
             target = [1, 0]
         else:
             target = [0, 1]
