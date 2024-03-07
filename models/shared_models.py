@@ -1,6 +1,7 @@
 import torch
 from transformers import DistilBertForSequenceClassification
-
+from torch import nn
+import torch.nn.functional as F
 
 # BERT-based model (only text)
 class BERTAndErnie(torch.nn.Module):
@@ -46,3 +47,42 @@ class RNNLM(torch.nn.Module):
         output = self.llayer(l_out[:, -1, :])
 
         return self.activation(output), hiddenn
+
+# Logistic Regression
+class LogisticRegression(torch.nn.Module):
+   def __init__(self, input_dim, output_dim):
+      super(LogisticRegression, self).__init__()
+      self.linear = torch.nn.Linear(input_dim, output_dim)
+      self.nonlinearity = torch.nn.Sigmoid()
+   
+   def forward(self, x):
+      z = self.linear(x)
+      #z_prime = self.linear_two(z)
+      y_hat = self.nonlinearity(z)
+      return y_hat
+   
+# Logistic Regression with Features
+class LogisticRegressionwithFeatures(torch.nn.Module):
+   def __init__(self, input_dim, feature_dim, output_dim):
+      super(LogisticRegressionwithFeatures, self).__init__()
+      self.linear = torch.nn.Linear(input_dim, 2)
+      self.sigmoid = torch.nn.Sigmoid()
+      self.feature_layer = torch.nn.Linear(feature_dim+2, output_dim)
+      
+   def forward(self, x, features):
+      z = self.linear(x)
+      x_prime = self.sigmoid(z)
+      z_features = torch.cat((x_prime, features), 1)
+      z_prime = self.feature_layer(z_features)
+      y_hat = torch.sigmoid(z_prime)
+      return y_hat
+   
+#SVM
+class SVM(nn.Module):
+    def __init__(self, n_features):
+        super(SVM, self).__init__()
+        self.linear = nn.Linear(n_features, 2)
+    
+    def forward(self, x):
+        out = self.linear(x)
+        return out
