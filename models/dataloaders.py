@@ -7,7 +7,7 @@ from transformers import DistilBertTokenizer
 from torchtext.vocab import GloVe
 from ast import literal_eval
 
-torch.set_default_dtype(torch.float64)
+# torch.set_default_dtype(torch.float64)
 from torch.utils.data import Dataset
 from torchtext.data import get_tokenizer
 
@@ -93,6 +93,7 @@ class BERTReviewData(Dataset):
         df: pd.DataFrame,
         tokenizer: DistilBertTokenizer,
         max_tokens: int,
+        labels: dict,
         expanded: bool = False,
     ):
         self.tokenizer = tokenizer
@@ -100,7 +101,9 @@ class BERTReviewData(Dataset):
         self.max_tokens = max_tokens
         self.expanded = expanded
         self.review_text = self.clean_text(self.df)
-        self.target_cat = self.df["Overall Compliance"]
+        self.target_cat = self.df["label"]
+        self.labels = labels
+
 
     def clean_text(self, df: pd.DataFrame) -> pd.Series:
 
@@ -115,13 +118,13 @@ class BERTReviewData(Dataset):
             return cleaned
 
         if self.expanded:
-            df["reviews"] = df["reviews"].str.strip()
-            df["reviews"] = df["reviews"].str.replace("\n", " ")
-            df["reviews"] = df["reviews"].str.replace(r"[^a-zA-Z0-9]", " ", regex=True)
+            df["text"] = df["text"].str.strip()
+            df["text"] = df["text"].str.replace("\n", " ")
+            df["text"] = df["text"].str.replace(r"[^a-zA-Z0-9]", " ", regex=True)
 
-            return df["reviews"]
+            return df["text"]
 
-        return df["reviews"].apply(clean_reviews)
+        return df["text"].apply(clean_reviews)
 
     def __len__(self):
         return len(self.review_text)
@@ -147,7 +150,7 @@ class BERTReviewData(Dataset):
 
         # [0, 1] = pass, [1, 0] = fail
         target = []
-        if target_cat == "No":
+        if target_cat == self.labels[0]:
             target = [1, 0]
         else:
             target = [0, 1]
@@ -161,15 +164,16 @@ class BERTReviewData(Dataset):
 
 # Fake review dataset - Jack
 class FakeReviewData(Dataset):
-    def __init__(self, df: pd.DataFrame, max_tokens: int, embedding: Callable):
+    def __init__(self, df: pd.DataFrame, max_tokens: int, embedding: Callable,  labels: dict):
         self.embedding = embedding
         if not embedding:
             self.embedding = GloVe("6B")
         self.tokenizer = get_tokenizer("basic_english")
         self.df = df
         self.max_tokens = max_tokens
+        self.labels = labels
         self.review_text = self.clean_text(self.df)
-        self.target_cat = self.df["Overall Compliance"]
+        self.target_cat = self.df["label"]
 
     def clean_text(self, df: pd.DataFrame) -> pd.Series:
 
@@ -190,7 +194,7 @@ class FakeReviewData(Dataset):
 
         # [0, 1] = real, [1, 0] = gpt
         target = []
-        if target_cat == "Yes":
+        if target_cat == self.labels[0]:
             target = [1, 0]
         else:
             target = [0, 1]
