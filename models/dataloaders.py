@@ -12,7 +12,7 @@ from torch.utils.data import Dataset
 from torchtext.data import get_tokenizer
 
 
-# VECTORIZER CLASS
+# VECTORIZER CLASS - Claire
 class Vectorizer(TfidfVectorizer):
     def __init__(self, ngram_range=None, max_features=None, stop_words=None):
 
@@ -36,7 +36,7 @@ class Vectorizer(TfidfVectorizer):
         self.vocabulary_ = self.tfidf.vocabulary_
         return self.tfidf.transform(texts)
     
-#REVIEWS DATASET CLASS
+#REVIEWS DATASET CLASS - Claire
 class ReviewsDataset(torch.utils.data.Dataset):
     def __init__(self, vectorizer, df_filepath, clean_regex="[^a-zA-Z0-9]", y_col="y", features=None, expanded=False):
 
@@ -86,7 +86,7 @@ class ReviewsDataset(torch.utils.data.Dataset):
         return sample
 
 
-# BERT dataset
+# BERT dataset - Jack
 class BERTReviewData(Dataset):
     def __init__(
         self,
@@ -159,7 +159,7 @@ class BERTReviewData(Dataset):
         }
 
 
-# Fake review dataset
+# Fake review dataset - Jack
 class FakeReviewData(Dataset):
     def __init__(self, df: pd.DataFrame, max_tokens: int, embedding: Callable):
         self.embedding = embedding
@@ -203,7 +203,7 @@ class FakeReviewData(Dataset):
         }
 
 
-# OTHER HELPERS
+# OTHER HELPERS - Claire
 def encode_output_variable(filepath, svm=None):
     df = pd.read_csv(filepath)
     if svm:

@@ -3,7 +3,7 @@ from transformers import DistilBertForSequenceClassification
 from torch import nn
 import torch.nn.functional as F
 
-# BERT-based model (only text)
+# BERT-based model (only text) - Jack
 class BERTAndErnie(torch.nn.Module):
     def __init__(self):
         super(BERTAndErnie, self).__init__()
@@ -19,7 +19,7 @@ class BERTAndErnie(torch.nn.Module):
         return output
 
 
-## RNN-LSTM
+## RNN-LSTM - Jack
 class RNNLM(torch.nn.Module):
     """Container module with an embedding module, an LSTM module,
     and a final linear layer to map the LSTM output to the
@@ -48,7 +48,7 @@ class RNNLM(torch.nn.Module):
 
         return self.activation(output), hiddenn
 
-# Logistic Regression
+# Logistic Regression - Claire
 class LogisticRegression(torch.nn.Module):
    def __init__(self, input_dim, output_dim):
       super(LogisticRegression, self).__init__()
@@ -61,7 +61,7 @@ class LogisticRegression(torch.nn.Module):
       y_hat = self.nonlinearity(z)
       return y_hat
    
-# Logistic Regression with Features
+# Logistic Regression with Features - Claire
 class LogisticRegressionwithFeatures(torch.nn.Module):
    def __init__(self, input_dim, feature_dim, output_dim):
       super(LogisticRegressionwithFeatures, self).__init__()
@@ -77,7 +77,7 @@ class LogisticRegressionwithFeatures(torch.nn.Module):
       y_hat = torch.sigmoid(z_prime)
       return y_hat
    
-#SVM
+#SVM - Claire
 class SVM(nn.Module):
     def __init__(self, n_features):
         super(SVM, self).__init__()

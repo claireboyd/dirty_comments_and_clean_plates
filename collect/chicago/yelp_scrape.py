@@ -13,7 +13,6 @@ logging.basicConfig(
     format="%(asctime)s - %(levelname)s - %(message)s",
 )
 
-
 def scrape_single_page(url: str) -> Tuple[List[dict[str, str]], int]:
     """
     Scrapes single Yelp page
